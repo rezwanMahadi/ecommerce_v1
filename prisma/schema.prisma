@@ -13,12 +13,16 @@ model User {
   password      String?
   name          String?
   image         String?
+  role          String    @default("CUSTOMER")
   emailVerified DateTime?
   accounts      Account[]
   sessions      Session[]
   orders        Order[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([email])
+  @@index([role])
 }
 
 model Product {
@@ -32,6 +36,10 @@ model Product {
   orderItems  OrderItem[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  @@index([category])
+  @@index([price])
+  @@index([name])
 }
 
 model Order {
@@ -43,6 +51,10 @@ model Order {
   items      OrderItem[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model OrderItem {
@@ -53,6 +65,9 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
   price     Float
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 // Auth.js required models
@@ -72,6 +87,7 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -80,4 +96,6 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

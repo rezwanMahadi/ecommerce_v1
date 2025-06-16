@@ -80,21 +80,19 @@ const SignUpComponent = () => {
       setSuccess(true);
       
       // Auto sign in after successful registration
-      setTimeout(async () => {
-        const result = await signIn('credentials', {
-          email: formData.email,
-          password: formData.password,
-          redirect: false,
-        });
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
 
-        if (result?.error) {
-          setError('Registration successful, but auto sign-in failed. Please sign in manually.');
-          setTimeout(() => router.push('/auth/signin'), 2000);
-        } else if (result?.ok) {
-          router.push('/dashboard');
-          router.refresh();
-        }
-      }, 1500);
+      if (result?.error) {
+        setError('Registration successful, but auto sign-in failed. Please sign in manually.');
+        setTimeout(() => router.push('/signin'), 2000);
+      } else if (result?.ok) {
+        router.push('/home');
+        router.refresh();
+      }
 
     } catch (error: any) {
       setError(error.message || 'Something went wrong. Please try again.');
@@ -109,7 +107,7 @@ const SignUpComponent = () => {
     
     try {
       await signIn('google', { 
-        callbackUrl: '/dashboard',
+        callbackUrl: '/home',
         redirect: true 
       });
     } catch (error) {
@@ -381,7 +379,7 @@ const SignUpComponent = () => {
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
               <button
-                onClick={() => router.push('/auth/signin')}
+                onClick={() => router.push('/signin')}
                 className="font-semibold text-purple-600 hover:text-purple-500 transition-colors"
               >
                 Sign in here

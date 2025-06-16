@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, ShoppingBag } from 'lucide-react';
@@ -13,7 +13,8 @@ const SignInComponent = () => {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleCredentialsSignIn = async () => {
+  // Use useCallback to prevent recreation of function on each render
+  const handleCredentialsSignIn = useCallback(async () => {
     if (!email || !password) {
       setError('Please fill in all fields');
       return;
@@ -32,7 +33,7 @@ const SignInComponent = () => {
       if (result?.error) {
         setError('Invalid credentials. Please check your email and password.');
       } else if (result?.ok) {
-        router.push('/dashboard');
+        router.push('/home');
         router.refresh();
       }
     } catch (error) {
@@ -40,44 +41,65 @@ const SignInComponent = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [email, password, router]);
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = useCallback(async () => {
     setIsLoading(true);
     setError('');
     
     try {
       await signIn('google', { 
-        callbackUrl: '/dashboard',
+        callbackUrl: '/home',
         redirect: true 
       });
     } catch (error) {
       setError('Google sign-in failed. Please try again.');
       setIsLoading(false);
     }
-  };
+  }, []);
 
-const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === 'Enter') {
         handleCredentialsSignIn();
     }
-};
+  }, [handleCredentialsSignIn]);
+  
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword(prev => !prev);
+  }, []);
+  
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  }, []);
+  
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+  }, []);
+  
+  const handleNavigateToSignUp = useCallback(() => {
+    router.push('/signup');
+  }, [router]);
+  
+  // Use useMemo to avoid recalculating on every render
+  const isSubmitDisabled = useMemo(() => {
+    return isLoading || !email || !password;
+  }, [isLoading, email, password]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
-        <div className="text-center">
-          <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg">
+        {/* <div className="text-center"> */}
+          {/* <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg">
             <ShoppingBag className="h-8 w-8 text-white" />
-          </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          </div> */}
+          {/* <h2 className="mt-6 text-3xl font-bold text-gray-900">
             Welcome Back
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             Sign in to your account to continue shopping
-          </p>
-        </div>
+          </p> */}
+        {/* </div> */}
 
         {/* Main Card */}
         <div className="bg-white py-8 px-6 shadow-2xl rounded-xl border border-gray-100">
@@ -105,7 +127,7 @@ const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailChange}
                   onKeyPress={handleKeyPress}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                   placeholder="Enter your email"
@@ -127,7 +149,7 @@ const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                   onKeyPress={handleKeyPress}
                   className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                   placeholder="Enter your password"
@@ -136,7 +158,7 @@ const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-indigo-600 transition-colors"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={togglePasswordVisibility}
                   disabled={isLoading}
                 >
                   {showPassword ? (
@@ -171,7 +193,7 @@ const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
             {/* Sign In Button */}
             <button
               onClick={handleCredentialsSignIn}
-              disabled={isLoading || !email || !password}
+              disabled={isSubmitDisabled}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               {isLoading ? (
@@ -220,7 +242,7 @@ const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
               <button
-                onClick={() => router.push('/auth/signup')}
+                onClick={handleNavigateToSignUp}
                 className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors"
               >
                 Sign up for free
@@ -243,4 +265,4 @@ const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
   );
 };
 
-export default SignInComponent;
+export default React.memo(SignInComponent);

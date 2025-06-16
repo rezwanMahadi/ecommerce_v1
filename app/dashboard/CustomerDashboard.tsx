@@ -185,34 +185,6 @@ const CustomerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <ShoppingBag className="h-8 w-8 text-indigo-600 mr-3" />
-              <h1 className="text-xl font-bold text-gray-900">Customer Dashboard</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center">
-                  <span className="text-sm font-medium text-white">
-                    {session?.user?.name?.charAt(0) || 'U'}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{session?.user?.name}</p>
-                  <p className="text-xs text-gray-500">{session?.user?.email}</p>
-                </div>
-              </div>
-              <button className="p-2 text-gray-400 hover:text-gray-600">
-                <LogOut className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
